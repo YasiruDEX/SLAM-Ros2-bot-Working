@@ -1,12 +1,8 @@
 import os
-
 from ament_index_python.packages import get_package_share_directory
-
-
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-
 from launch_ros.actions import Node
 
 
@@ -32,7 +28,7 @@ def generate_launch_description():
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
 
-    twist_mux_params = os.path.join(get_package_share_directory(package_name),'config','twist_mux.yaml')
+    twist_mux_params = os.path.join(get_package_share_directory(package_name),'config','my_parameters.yaml')
     twist_mux = Node(
             package="twist_mux",
             executable="twist_mux",
@@ -41,7 +37,7 @@ def generate_launch_description():
         )
 
 
-    gazebo_params_file = os.path.join(get_package_share_directory(package_name),'config','gazebo_params.yaml')
+    gazebo_params_file = os.path.join(get_package_share_directory(package_name),'config','my_parameters.yaml')
 
     # Include the Gazebo launch file, provided by the gazebo_ros package
     gazebo = IncludeLaunchDescription(
