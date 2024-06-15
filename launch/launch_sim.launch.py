@@ -4,16 +4,29 @@ from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch.actions import TimerAction
 
 
 
 def generate_launch_description():
 
+    package_name='SLAM_ros2_bot'
 
-    # Include the robot_state_publisher launch file, provided by our own package. Force sim time to be enabled
-    # !!! MAKE SURE YOU SET THE PACKAGE NAME CORRECTLY !!!
-
-    package_name='SLAM_ros2_bot' #<--- CHANGE ME
+    delayed_controller_manager_spawner = TimerAction(
+        period=10.0,
+        actions=[
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["diff_cont"],
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["joint_broad"],
+            )
+        ],
+    )
 
     rsp = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
@@ -49,20 +62,20 @@ def generate_launch_description():
     # Run the spawner node from the gazebo_ros package. The entity name doesn't really matter if you only have a single robot.
     spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py',
                         arguments=['-topic', 'robot_description',
-                                   '-entity', 'my_bot'],
+                                   '-entity', 'SLAM_ros2_bot'],
                         output='screen')
     
-    diff_drive_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["diff_cont"],
-    )
+    # diff_drive_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["diff_cont"],
+    # )
 
-    joint_broad_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_broad"],
-    )
+    # joint_broad_spawner = Node(
+    #     package="controller_manager",
+    #     executable="spawner",
+    #     arguments=["joint_broad"],
+    # )
 
     # Launch them all!
     return LaunchDescription([
@@ -71,6 +84,7 @@ def generate_launch_description():
         joystick,
         twist_mux,
         spawn_entity,
-        diff_drive_spawner,
-        joint_broad_spawner
+        # diff_drive_spawner,
+        # joint_broad_spawner,
+        delayed_controller_manager_spawner
     ])
