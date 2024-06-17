@@ -24,7 +24,27 @@ def generate_launch_description():
                 package="controller_manager",
                 executable="spawner",
                 arguments=["joint_broad"],
-            )
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["left_joint_1_position_controller"],
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["left_joint_2_position_controller"],
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["right_joint_1_position_controller"],
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["right_joint_2_position_controller"],
+            ),
         ],
     )
 
