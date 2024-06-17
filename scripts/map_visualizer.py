@@ -30,6 +30,10 @@ class MapVisualizer(Node):
         # Update Tkinter every 100 ms
         self.update_tkinter()
 
+        # Initialize variables for mouse click handling
+        self.map_data = None
+        self.click_cid = None
+
     def map_callback(self, msg):
         self.get_logger().info('Received map data')
         self.map_data = msg
@@ -51,9 +55,26 @@ class MapVisualizer(Node):
         self.ax.set_ylabel('Y')
         self.canvas.draw()
 
+        # Disconnect previous click event handler, if any
+        if self.click_cid:
+            self.canvas.mpl_disconnect(self.click_cid)
+
+        # Connect new click event handler
+        self.click_cid = self.canvas.mpl_connect('button_press_event', self.on_click)
+
     def update_tkinter(self):
         self.root.update()
         self.root.after(100, self.update_tkinter)
+
+    def on_click(self, event):
+        if event.button == 1:  # Left mouse button click
+            if event.inaxes == self.ax:
+                # Convert pixel coordinates to map coordinates
+                map_coord_x = event.xdata
+                map_coord_y = event.ydata
+
+                # Print map coordinates to terminal
+                self.get_logger().info(f'Clicked at Map Coordinates: ({map_coord_x}, {map_coord_y})')
 
 def main(args=None):
     rclpy.init(args=args)

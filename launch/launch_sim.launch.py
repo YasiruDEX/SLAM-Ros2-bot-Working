@@ -48,7 +48,15 @@ def generate_launch_description():
             parameters=[twist_mux_params, {'use_sim_time': True}],
             remappings=[('/cmd_vel_out','/diff_cont/cmd_vel_unstamped')]
         )
-
+    
+    depthimage_to_laserscan = Node(
+            package='depthimage_to_laserscan',
+            executable='depthimage_to_laserscan_node',
+            name='depthimage_to_laserscan',
+            remappings=[('depth', '/kinect_depth/depth/image_raw'),
+                        ('depth_camera_info', '/kinect_depth/camera_info')],
+            parameters=[{'output_frame': 'laser_frame'}]
+        )
 
     gazebo_params_file = os.path.join(get_package_share_directory(package_name),'config','my_parameters.yaml')
 
@@ -84,6 +92,7 @@ def generate_launch_description():
         joystick,
         twist_mux,
         spawn_entity,
+        depthimage_to_laserscan,
         # diff_drive_spawner,
         # joint_broad_spawner,
         delayed_controller_manager_spawner
