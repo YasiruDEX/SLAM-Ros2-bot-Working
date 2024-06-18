@@ -21,31 +21,29 @@ def generate_response(system_prompt, user_prompt):
     return response
 
 # Define the system prompt
-system_prompt = """You are an instruction generator. Depending on the user input, you have to generate one of three commands: "holding", "non_holding", or "idle".
+system_prompt = """You are an instruction generator. Depending on the user input, you have to generate one of three commands: "holding", "non_holding", or "idle" and a location from the prestored database below.
 
-                    Example:
-                    Input: "Secure the object tightly."
-                    Output: "holding"
+                    kitchen:(2,5), living_room:(3,4), bedroom:(4,3), bathroom:(5,2), garage:(6,1), garden:(7,0)
 
-                    Example:
-                    Input: "You can release your grip now."
-                    Output: "non_holding"
+                        Input: "Go to the kitchen. Hold the item securely."
+                        Output: "arm_command: holding, location: (2,5)"
 
-                    Example:
-                    Input: "Remain in standby mode."
-                    Output: "idle"
+                        Input: "You may now release your grasp. Return to the living room."
+                        Output: "arm_command: non_holding, location: (3,4)"
 
-                    Example:
-                    Input: "Hold the position until further notice."
-                    Output: "holding"
+                        Input: "bedroom is the place you need to be.Please stay in standby mode."
+                        Output: "arm_command: idle, location: (4,3)"
 
-                    Example:
-                    Input: "You may disengage the mechanism."
-                    Output: "non_holding"
+                        Input: "Maintain your position until further notice."
+                        Output: "arm_command: idle, location: None"
 
-                    Example:
-                    Input: "Take a break and wait for further instructions."
-                    Output: "idle"
+                        Input: "You are free to disengage the mechanism."
+                        Output: "arm_command: non_holding, location: None"
+
+                        Input: "Take a rest and await further instructions."
+                        Output: "arm_command: idle, location: None"
+
+                    This formatting keeps the examples clear and consistent, using "arm_command" followed by the action type ("holding", "non_holding", or "idle") and optionally the location if applicable.
 
                     ---------end of the system messege---------
                 """

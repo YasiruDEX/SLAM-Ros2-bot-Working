@@ -1,19 +1,31 @@
+import os
 import pyaudio
 import numpy as np
-import soundfile as sf
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
+import torch
 
-# Load the Whisper model and processor
+# Suppress ALSA warnings
+os.environ["PYTHONWARNINGS"] = "ignore"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["NUMBA_WARNINGS"] = "ignore"
+os.environ["NUMBA_LOG_LEVEL"] = "0"
+
+# Load the Whisper model and processor from local files
 processor = WhisperProcessor.from_pretrained("openai/whisper-small")
 model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
-model.config.forced_decoder_ids = None
 
+# Move the model to GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+model.config.forced_decoder_ids = None
 
 # Function to transcribe audio
 def transcribe_audio(audio_array, sampling_rate):
-    input_features = processor(audio_array, sampling_rate=sampling_rate, return_tensors="pt").input_features
-    predicted_ids = model.generate(input_features)
-    transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)
+    input_features = processor(audio_array, sampling_rate=sampling_rate, return_tensors="pt").input_features.to(device)
+    # Set the language to English
+    forced_decoder_ids = processor.tokenizer.get_decoder_prompt_ids(language="en", task="transcribe")
+    generated_tokens = model.generate(input_features, forced_decoder_ids=forced_decoder_ids)
+    transcription = processor.batch_decode(generated_tokens, skip_special_tokens=True)
     return transcription
 
 # Function to continuously listen to the microphone
@@ -33,29 +45,34 @@ def listen_microphone():
 
     print("Listening...")
 
-    frames = []
+    buffer = []
+    buffer_duration = 0  # Duration of audio in buffer
     listening = True
-    while listening:
-        try:
-            data = stream.read(chunk)
-            frames.append(data)
-            audio_array = np.frombuffer(data, dtype=np.float32)
-            
-            # Example for continuous transcription
-            if len(audio_array) > 0:
-                # Process audio data and transcribe
-                transcription = transcribe_audio(audio_array, sampling_rate=fs)
-                print("Transcription:", transcription)
-            
-        except KeyboardInterrupt:
-            print("Stopped listening.")
-            listening = False
-            break
 
-    # Stop and close the stream
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    try:
+        while listening:
+            data = stream.read(chunk)
+            audio_array = np.frombuffer(data, dtype=np.float32)
+            buffer.append(audio_array)
+            buffer_duration += len(audio_array) / fs
+
+            # Process audio data if buffer duration exceeds threshold (e.g., 5 seconds)
+            if buffer_duration >= 5:
+                combined_audio = np.concatenate(buffer, axis=0)
+                transcription = transcribe_audio(combined_audio, sampling_rate=fs)
+                print("Transcription:", transcription)
+
+                # Clear buffer
+                buffer = []
+                buffer_duration = 1
+
+    except KeyboardInterrupt:
+        print("Stopped listening.")
+    finally:
+        # Stop and close the stream
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
 
 if __name__ == "__main__":
     listen_microphone()
