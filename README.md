@@ -33,6 +33,6 @@
 
 <p>Stay tuned for LUNA, the broader real-world implementation of this SLAM project!</p>
 
-<p>🔗 Video explanation: <a href="[https://lnkd.in/gpDc4UEr](https://www.linkedin.com/posts/yasirubasnayake_robotics-ai-ros2-activity-7208786794740412416-wb0-?utm_source=share&utm_medium=member_desktop)">Explore Here</a></p>
+<p>🔗 Video explanation: <a href="https://www.linkedin.com/posts/yasirubasnayake_robotics-ai-ros2-activity-7208786794740412416-wb0-?utm_source=share&utm_medium=member_desktop">Explore Here</a></p>
 
 <p>#Robotics #AI #ROS2 #MachineLearning #SLAM #VLN #Innovation #TechProjects</p>
